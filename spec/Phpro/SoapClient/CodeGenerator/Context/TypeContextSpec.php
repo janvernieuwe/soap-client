@@ -19,7 +19,7 @@ class TypeContextSpec extends ObjectBehavior
 {
     function let(ClassGenerator $class, Type $type)
     {
-        $this->beConstructedWith($class, $type);
+        $this->beConstructedWith($class, $type, 'src/test', 'TestType');
     }
 
     function it_is_initializable()

@@ -7,6 +7,7 @@ use Phpro\SoapClient\CodeGenerator\Context\ContextInterface;
 use Phpro\SoapClient\CodeGenerator\Model\TypeMap;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
+use Zend\Code\Generator\ClassGenerator;
 use Zend\Code\Generator\FileGenerator;
 
 /**
@@ -17,9 +18,9 @@ use Zend\Code\Generator\FileGenerator;
  */
 class ClassMapContextSpec extends ObjectBehavior
 {
-    function let(FileGenerator $fileGenerator, TypeMap $typeMap)
+    function let(ClassGenerator $classGenerator, TypeMap $typeMap)
     {
-        $this->beConstructedWith($fileGenerator, $typeMap, 'ClassMap', 'App\\Mynamespace');
+        $this->beConstructedWith($classGenerator, $typeMap, 'ClassMap', 'App\\Mynamespace', 'src/test');
     }
 
     function it_is_initializable()
@@ -32,9 +33,9 @@ class ClassMapContextSpec extends ObjectBehavior
         $this->shouldImplement(ContextInterface::class);
     }
 
-    function it_has_a_file_generator(FileGenerator $fileGenerator)
+    function it_has_a_file_generator()
     {
-        $this->getFile()->shouldReturn($fileGenerator);
+        $this->getFileGenerator()->shouldHaveType(FileGenerator::class);
     }
 
     function it_has_a_typemap(TypeMap $typeMap)

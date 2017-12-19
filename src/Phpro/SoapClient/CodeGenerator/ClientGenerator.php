@@ -2,14 +2,11 @@
 
 namespace Phpro\SoapClient\CodeGenerator;
 
+use Phpro\SoapClient\CodeGenerator\Context\ClientContext;
 use Phpro\SoapClient\CodeGenerator\Context\ClientMethodContext;
-use Phpro\SoapClient\CodeGenerator\Context\PropertyContext;
-use Phpro\SoapClient\CodeGenerator\Context\TypeContext;
-use Phpro\SoapClient\CodeGenerator\Model\Client;
-use Phpro\SoapClient\CodeGenerator\Model\Type;
+use Phpro\SoapClient\CodeGenerator\Context\GeneratorContextInterface;
 use Phpro\SoapClient\CodeGenerator\Rules\RuleSetInterface;
 use Zend\Code\Generator\ClassGenerator;
-use Zend\Code\Generator\FileGenerator;
 
 /**
  * Class ClientGenerator
@@ -34,14 +31,14 @@ class ClientGenerator implements GeneratorInterface
     }
 
     /**
-     * @param FileGenerator $file
-     * @param Client        $client
-     *
+     * @param GeneratorContextInterface|ClientContext $context
      * @return string
      */
-    public function generate(FileGenerator $file, $client): string
+    public function generate(GeneratorContextInterface $context): string
     {
-        $class = $file->getClass() ?: new ClassGenerator();
+        $file = $context->getFileGenerator();
+        $client = $context->getObject();
+        $class = $context->getClass() ?: new ClassGenerator();
         $class->setNamespaceName($client->getNamespace());
         $class->setName($client->getName());
         $methods = $client->getMethodMap();
@@ -49,8 +46,6 @@ class ClientGenerator implements GeneratorInterface
         foreach ($methods->getMethods() as $method) {
             $this->ruleSet->applyRules(new ClientMethodContext($class, $method));
         }
-
-        $file->setClass($class);
 
         return $file->generate();
     }

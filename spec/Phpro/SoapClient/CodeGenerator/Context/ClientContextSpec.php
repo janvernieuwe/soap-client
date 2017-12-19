@@ -4,8 +4,7 @@ namespace spec\Phpro\SoapClient\CodeGenerator\Context;
 
 use Phpro\SoapClient\CodeGenerator\Context\ClientContext;
 use Phpro\SoapClient\CodeGenerator\Context\ContextInterface;
-use Phpro\SoapClient\CodeGenerator\Context\TypeContext;
-use Phpro\SoapClient\CodeGenerator\Model\Type;
+use Phpro\SoapClient\CodeGenerator\Model\Client;
 use PhpSpec\ObjectBehavior;
 use Zend\Code\Generator\ClassGenerator;
 
@@ -13,13 +12,13 @@ use Zend\Code\Generator\ClassGenerator;
  * Class TypeContextSpec
  *
  * @package spec\Phpro\SoapClient\CodeGenerator\Context
- * @mixin TypeContext
+ * @mixin ClientContext
  */
 class ClientContextSpec extends ObjectBehavior
 {
-    function let(ClassGenerator $class, Type $type)
+    function let(ClassGenerator $class, Client $client)
     {
-        $this->beConstructedWith($class, $type);
+        $this->beConstructedWith($class, $client, 'src/test', 'Client');
     }
 
     function it_is_initializable()
@@ -37,8 +36,8 @@ class ClientContextSpec extends ObjectBehavior
         $this->getClass()->shouldReturn($class);
     }
 
-    function it_has_a_type(Type $type)
+    function it_has_a_client(Client $client)
     {
-        $this->getType()->shouldReturn($type);
+        $this->getClient()->shouldReturn($client);
     }
 }

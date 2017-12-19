@@ -2,15 +2,16 @@
 
 namespace Phpro\SoapClient\CodeGenerator\Context;
 
-use Phpro\SoapClient\CodeGenerator\Model\Type;
+use Phpro\SoapClient\CodeGenerator\Model\Client;
 use Zend\Code\Generator\ClassGenerator;
+use Zend\Code\Generator\FileGenerator;
 
 /**
  * Class ClientContext
  *
  * @package Phpro\SoapClient\CodeGenerator\Context
  */
-class ClientContext implements ContextInterface
+class ClientContext extends AbstractGeneratorInterface implements ContextInterface, GeneratorContextInterface
 {
     /**
      * @var ClassGenerator
@@ -18,35 +19,70 @@ class ClientContext implements ContextInterface
     private $class;
 
     /**
-     * @var Type
+     * @var Client
      */
-    private $type;
+    private $client;
+
+    /**
+     * @var string
+     */
+    private $destination;
+
+    /**
+     * @var string
+     */
+    private $name;
 
     /**
      * PropertyContext constructor.
      *
      * @param ClassGenerator $class
-     * @param Type           $type
+     * @param Client         $client
+     * @param string         $destination
+     * @param string         $name
      */
-    public function __construct(ClassGenerator $class, Type $type)
+    public function __construct(ClassGenerator $class, Client $client, string $destination, string $name)
     {
         $this->class = $class;
-        $this->type = $type;
+        $this->client = $client;
+        $this->destination = $destination;
+        $this->name = $name;
+    }
+
+    /**
+     * @return FileGenerator
+     */
+    public function getFileGenerator(): FileGenerator
+    {
+        $file = new FileGenerator();
+        $file->setClass($this->class);
+
+        return $file;
+    }
+
+    /**
+     * @return Client
+     */
+    public function getClient(): Client
+    {
+        return $this->client;
     }
 
     /**
      * @return ClassGenerator
      */
-    public function getClass()
+    public function getClass(): ClassGenerator
     {
         return $this->class;
     }
 
-    /**
-     * @return Type
-     */
-    public function getType()
+    public function getObject()
     {
-        return $this->type;
+        return $this->client;
+    }
+
+    public function getFileInfo(): \SplFileInfo
+    {
+        return new \SplFileInfo($this->destination.DIRECTORY_SEPARATOR.$this->name.'.php');
     }
 }

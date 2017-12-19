@@ -38,30 +38,56 @@ class TypeGeneratorSpec extends ObjectBehavior
         $this->shouldImplement(GeneratorInterface::class);
     }
 
-    function it_generates_types(RuleSetInterface $ruleSet, FileGenerator $file, ClassGenerator $class)
-    {
+    function it_generates_types(
+        RuleSetInterface $ruleSet,
+        FileGenerator $file,
+        ClassGenerator $class,
+        TypeContext $context
+    ) {
+
+
+        $code = <<<CODE
+<?php
+
+code
+
+CODE;
         $type = new Type('MyNamespace', 'MyType', ['prop1' => 'string']);
         $property = $type->getProperties()[0];
 
-        $file->generate()->willReturn('code');
+        $file->generate()->willReturn($code);
         $file->getClass()->willReturn($class);
 
         $class->setNamespaceName('MyNamespace')->shouldBeCalled();
         $class->setName('MyType')->shouldBeCalled();
-        $file->setClass($class)->shouldBeCalled();
+        $class->getName()->shouldBeCalled();
+        $class->isSourceDirty()->shouldBeCalled();
+        $class->getUses()->shouldBeCalled();
+        $class->generate()->willReturn('code');
 
-        $ruleSet->applyRules(Argument::that(function (ContextInterface $context) use ($type) {
-            return $context instanceof TypeContext
-                && $context->getType() === $type;
-        }))->shouldBeCalled();
+        $ruleSet->applyRules(
+            Argument::that(
+                function (ContextInterface $context) use ($type) {
+                    return $context instanceof TypeContext
+                        && $context->getType() === $type;
+                }
+            )
+        )->shouldBeCalled();
 
 
-        $ruleSet->applyRules(Argument::that(function (ContextInterface $context) use ($type, $property) {
-            return $context instanceof PropertyContext
-                && $context->getType() === $type
-                && $context->getProperty() === $property;
-        }))->shouldBeCalled();
+        $ruleSet->applyRules(
+            Argument::that(
+                function (ContextInterface $context) use ($type, $property) {
+                    return $context instanceof PropertyContext
+                        && $context->getType() === $type
+                        && $context->getProperty() === $property;
+                }
+            )
+        )->shouldBeCalled();
 
-        $this->generate($file, $type)->shouldReturn('code');
+        $context->getFileGenerator()->willReturn($file);
+        $context->getType()->willReturn($type);
+        $context->getClass()->willReturn($class);
+        $this->generate($context)->shouldReturn($code);
     }
 }

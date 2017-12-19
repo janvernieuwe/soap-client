@@ -2,7 +2,7 @@
 
 namespace Phpro\SoapClient\CodeGenerator;
 
-use Zend\Code\Generator\FileGenerator;
+use Phpro\SoapClient\CodeGenerator\Context\GeneratorContextInterface;
 
 /**
  * Interface GeneratorInterface
@@ -12,10 +12,8 @@ use Zend\Code\Generator\FileGenerator;
 interface GeneratorInterface
 {
     /**
-     * @param FileGenerator $file
-     * @param mixed         $model
-     *
+     * @param GeneratorContextInterface $context
      * @return string
      */
-    public function generate(FileGenerator $file, $model): string;
+    public function generate(GeneratorContextInterface $context): string;
 }

@@ -2,9 +2,9 @@
 
 namespace Phpro\SoapClient\CodeGenerator;
 
+use Phpro\SoapClient\CodeGenerator\Context\GeneratorContextInterface;
 use Phpro\SoapClient\CodeGenerator\Context\PropertyContext;
 use Phpro\SoapClient\CodeGenerator\Context\TypeContext;
-use Phpro\SoapClient\CodeGenerator\Model\Type;
 use Phpro\SoapClient\CodeGenerator\Rules\RuleSetInterface;
 use Zend\Code\Generator\ClassGenerator;
 use Zend\Code\Generator\FileGenerator;
@@ -32,23 +32,21 @@ class TypeGenerator implements GeneratorInterface
     }
 
     /**
-     * @param FileGenerator $file
-     * @param Type          $type
-     *
+     * @param GeneratorContextInterface|TypeContext $context
      * @return string
      */
-    public function generate(FileGenerator $file, $type): string
+    public function generate(GeneratorContextInterface $context): string
     {
-        $class = $file->getClass() ?: new ClassGenerator();
+        $type = $context->getType();
+        $class = $context->getClass() ?: new ClassGenerator();
         $class->setNamespaceName($type->getNamespace());
         $class->setName($type->getName());
-
-        $this->ruleSet->applyRules(new TypeContext($class, $type));
+        $this->ruleSet->applyRules($context);
 
         foreach ($type->getProperties() as $property) {
             $this->ruleSet->applyRules(new PropertyContext($class, $type, $property));
         }
-
+        $file = new FileGenerator();
         $file->setClass($class);
 
         return $file->generate();
