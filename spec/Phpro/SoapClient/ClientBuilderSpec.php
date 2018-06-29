@@ -12,14 +12,13 @@ use Phpro\SoapClient\Soap\TypeConverter\DateTypeConverter;
 use Phpro\SoapClient\Soap\TypeConverter\DecimalTypeConverter;
 use Phpro\SoapClient\Soap\TypeConverter\DoubleTypeConverter;
 use Phpro\SoapClient\Soap\TypeConverter\TypeConverterCollection;
-use Phpro\SoapClient\Soap\TypeConverter\TypeConverterInterface;
 use PhpSpec\ObjectBehavior;
 
 class ClientBuilderSpec extends ObjectBehavior
 {
     function let()
     {
-        $wsdl = realpath(__DIR__ . '/../../../test/fixtures/wsdl/wheater-ws.wsdl');
+        $wsdl = realpath(__DIR__.'/../../../test/fixtures/wsdl/wheater-ws.wsdl');
         $this->beConstructedWith(new ClientFactory(Client::class), $wsdl, []);
     }
 
@@ -36,12 +35,8 @@ class ClientBuilderSpec extends ObjectBehavior
     function it_should_add_default_converters_to_client()
     {
         $this->createSoapClientFactory()->shouldBeLike(
-            new SoapClientFactory(new ClassMapCollection(), new TypeConverterCollection([
-                new DateTimeTypeConverter(),
-                new DateTypeConverter(),
-                new DecimalTypeConverter(),
-                new DoubleTypeConverter()
-            ])));
+            new SoapClientFactory(new ClassMapCollection())
+        );
 
         $this->build()->shouldBeAnInstanceOf(Client::class);
     }
@@ -60,12 +55,17 @@ class ClientBuilderSpec extends ObjectBehavior
         $this->addTypeConverter($myDateTimeTypeConverter);
 
         $this->createSoapClientFactory()->shouldBeLike(
-            new SoapClientFactory(new ClassMapCollection(), new TypeConverterCollection([
-                $myDateTimeTypeConverter->getWrappedObject(),
-                new DateTypeConverter(),
-                new DecimalTypeConverter(),
-                new DoubleTypeConverter()
-            ])));
+            new SoapClientFactory(
+                new ClassMapCollection(), new TypeConverterCollection(
+                [
+                    $myDateTimeTypeConverter->getWrappedObject(),
+                    new DateTypeConverter(),
+                    new DecimalTypeConverter(),
+                    new DoubleTypeConverter(),
+                ]
+            )
+            )
+        );
 
         $this->build()->shouldBeAnInstanceOf(Client::class);
     }

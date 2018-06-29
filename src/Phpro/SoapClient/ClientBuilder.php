@@ -12,7 +12,6 @@ use Phpro\SoapClient\Soap\ClassMap\ClassMapInterface;
 use Phpro\SoapClient\Soap\Handler\HandlerInterface;
 use Phpro\SoapClient\Soap\SoapClient;
 use Phpro\SoapClient\Soap\SoapClientFactory;
-use Phpro\SoapClient\Soap\TypeConverter;
 use Phpro\SoapClient\Soap\TypeConverter\TypeConverterCollection;
 use Phpro\SoapClient\Soap\TypeConverter\TypeConverterInterface;
 use Phpro\SoapClient\Wsdl\Provider\MixedWsdlProvider;
@@ -92,12 +91,12 @@ class ClientBuilder
     public function __construct(ClientFactoryInterface $clientFactory, string $wsdl, array $soapOptions = [])
     {
         $this->classMaps = new ClassMapCollection();
-        $this->converters = new TypeConverterCollection();
         $this->dispatcher = new EventDispatcher();
         $this->wsdlProvider = new MixedWsdlProvider();
         $this->clientFactory = $clientFactory;
         $this->wsdl = $wsdl;
         $this->soapOptions = $soapOptions;
+        $this->converters = TypeConverterCollection::createDefaultCollection();
     }
 
     /**
@@ -165,25 +164,6 @@ class ClientBuilder
     }
 
     /**
-     * Add the default to converters
-     */
-    public function addDefaultTypeConverters()
-    {
-        $converters = [
-            new TypeConverter\DateTimeTypeConverter(),
-            new TypeConverter\DateTypeConverter(),
-            new TypeConverter\DecimalTypeConverter(),
-            new TypeConverter\DoubleTypeConverter()
-        ];
-
-        foreach ($converters as $converter) {
-            if (!$this->converters->has($converter)) {
-                $this->addTypeConverter($converter);
-            }
-        }
-    }
-
-    /**
      * @param HandlerInterface $handler
      */
     public function withHandler(HandlerInterface $handler)
@@ -204,9 +184,6 @@ class ClientBuilder
      */
     public function createSoapClientFactory()
     {
-        // Add default converters:
-        $this->addDefaultTypeConverters();
-
         return new SoapClientFactory($this->classMaps, $this->converters);
     }
 
@@ -216,15 +193,14 @@ class ClientBuilder
      */
     public function build(): ClientInterface
     {
-        $soapClient = $this
-            ->createSoapClientFactory()
-            ->factory($this->wsdlProvider->provide($this->wsdl), $this->soapOptions);
+        $soapClientFactory = new SoapClientFactory($this->classMaps);
+        $soapClient = $soapClientFactory->factory($this->wsdlProvider->provide($this->wsdl), $this->soapOptions);
 
         if ($this->handler && !$soapClient instanceof SoapClient) {
             throw new InvalidArgumentException(sprintf(
                 'You can only add handlers if the SoapClientFactory is returning an instance of %s. Got: %s',
                 SoapClient::class,
-                get_class($soapClient)
+                \get_class($soapClient)
             ));
         }
 
@@ -232,7 +208,7 @@ class ClientBuilder
             $soapClient->setHandler($this->handler);
         }
 
-        if (count($this->middlewares)) {
+        if (\count($this->middlewares)) {
             if (!$this->handler instanceof MiddlewareSupportingInterface) {
                 throw new InvalidArgumentException('The SOAP handler you selected does not support middlewares.');
             }

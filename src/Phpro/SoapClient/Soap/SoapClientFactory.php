@@ -19,18 +19,11 @@ class SoapClientFactory
     private $classMap;
 
     /**
-     * @var TypeConverterCollection
+     * @param ClassMapCollection $classMap
      */
-    private $typeConverters;
-
-    /**
-     * @param ClassMapCollection      $classMap
-     * @param TypeConverterCollection $typeConverters
-     */
-    public function __construct(ClassMapCollection $classMap, TypeConverterCollection $typeConverters)
+    public function __construct(ClassMapCollection $classMap)
     {
         $this->classMap = $classMap;
-        $this->typeConverters = $typeConverters;
     }
 
     /**
@@ -48,11 +41,29 @@ class SoapClientFactory
             'cache_wsdl' => WSDL_CACHE_BOTH,
             'features' => SOAP_SINGLE_ELEMENT_ARRAYS,
             'classmap' => $this->classMap->toSoapClassMap(),
-            'typemap' => $this->typeConverters->toSoapTypeMap(),
+            'typemap' => TypeConverterCollection::createDefaultCollection(),
         ];
 
         $options = array_merge($defaults, $soapOptions);
+        $options['typemap'] = $this->convertTypeMapToSoap($options['typemap']);
+
+        /** @var TypeConverterCollection $typemap */
+        $typemap = $options['typemap'];
+        $options['typemap'] = $typemap->toSoapTypeMap();
+
+        /** @var TypeConverterCollection $typemap */
+        $typemap = $options['typemap'];
+        $options['typemap'] = $typemap->toSoapTypeMap();
 
         return new SoapClient($wsdl, $options);
+    }
+
+    /**
+     * @param TypeConverterCollection $collection
+     * @return array
+     */
+    private function convertTypeMapToSoap(TypeConverterCollection $collection): array
+    {
+        return $collection->toSoapTypeMap();
     }
 }

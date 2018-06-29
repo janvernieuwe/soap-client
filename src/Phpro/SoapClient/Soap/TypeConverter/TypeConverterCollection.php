@@ -37,7 +37,7 @@ class TypeConverterCollection
      */
     private function serialize(TypeConverterInterface $converter): string
     {
-        return $converter->getTypeNamespace() . ':' . $converter->getTypeName();
+        return $converter->getTypeNamespace().':'.$converter->getTypeName();
     }
 
     /**
@@ -104,16 +104,33 @@ class TypeConverterCollection
         foreach ($this->converters as $converter) {
             $typemap[] = [
                 'type_name' => $converter->getTypeName(),
-                'type_ns'   => $converter->getTypeNamespace(),
-                'from_xml'  => function ($input) use ($converter) {
+                'type_ns' => $converter->getTypeNamespace(),
+                'from_xml' => function ($input) use ($converter) {
                     return $converter->convertXmlToPhp($input);
                 },
-                'to_xml'    => function ($input) use ($converter) {
+                'to_xml' => function ($input) use ($converter) {
                     return $converter->convertPhpToXml($input);
                 },
             ];
         }
 
         return $typemap;
+    }
+
+    /**
+     * Create the collection with default converters
+     *
+     * @return TypeConverterCollection
+     */
+    public static function createDefaultCollection(): TypeConverterCollection
+    {
+        return new self(
+            [
+                new DateTimeTypeConverter(),
+                new DateTypeConverter(),
+                new DecimalTypeConverter(),
+                new DoubleTypeConverter(),
+            ]
+        );
     }
 }

@@ -28,10 +28,11 @@ class ClientFactory implements ClientFactoryInterface
     }
 
     /**
-     * @param SoapClient               $soapClient
+     * @param SoapClient $soapClient
      * @param EventDispatcherInterface $dispatcher
      *
      * @return object
+     * @throws \ReflectionException
      */
     public function factory(SoapClient $soapClient, EventDispatcherInterface $dispatcher)
     {
